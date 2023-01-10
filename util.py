@@ -1,3 +1,4 @@
+import functools
 import itertools
 import os
 import random
@@ -6,6 +7,9 @@ from typing import Iterable, List
 import numpy as np
 
 import tensorflow as tf
+import keras as ks
+from keras import backend as K
+from sklearn.metrics import f1_score
 
 
 def get_variables(module_name):
@@ -80,3 +84,24 @@ def set_reproducibility(seed):
 
 def current_seed():
     return int(os.environ['SEED'])
+
+def get_unbatched_labels(dataset: tf.data.Dataset) -> tf.Tensor:
+    return tf.ragged.stack([y for x, y in dataset.unbatch()]).to_tensor(default_value=0)
+
+@tf.function
+def compute_blacklist_mask(y_true: tf.Tensor, black_list: Iterable) -> tf.Tensor:
+  return ~tf_in(y_true, black_list)
+
+
+
+
+# class LabelMaskLayer(keras.layers.Masking):
+#     def __init__(self, labels: Iterable) -> None:
+#         super(LabelMaskLayer, self).__init__()
+#         self.labels = labels
+    
+#     def compute_mask(self, inputs, mask=None):
+#         # Also split the mask into 2 if it presents.
+#         if mask is None:
+#             return None
+#         return tf.split(mask, 2, axis=1)
