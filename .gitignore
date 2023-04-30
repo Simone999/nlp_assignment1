@@ -160,4 +160,5 @@ cython_debug/
 #.idea/
 
 secrets.json
+venv2
 dependency_treebank
